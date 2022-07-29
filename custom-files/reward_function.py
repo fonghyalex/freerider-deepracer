@@ -22,7 +22,7 @@ def reward_function(params):
     # - - - - - 
     
     # Penalize if slow speed_weight
-    if not params['speed'] < 3:
+    if not params['speed'] < 5:
         return 1e-3
     
     # Calculate the direction of the center line based on the closest waypoints
