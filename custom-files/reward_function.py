@@ -420,7 +420,7 @@ def reward_function(params):
     opt_speed = optimal_speed(optimal_heading_diff)
     steering_angle_optimal_heading_diff = abs(steering_angle - optimal_heading_diff)
     speed_optimal_speed_difference = abs(opt_speed - params['speed'])
-    print(f'steering_angle_optimal_heading_diff: {steering_angle_optimal_heading_diff}')
+    # print(f'steering_angle_optimal_heading_diff: {steering_angle_optimal_heading_diff}')
     
     # give the reward
     if steering_angle_optimal_heading_diff > 30:
