@@ -411,7 +411,7 @@ def calculate_heading_difference_weighting(params):
     return optimal_angle
 
 def reward_function(params):
-    print_params(params)
+    # print_params(params)
     steering_angle = params['steering_angle']
     ### Initial reward
     reward = 10.0
