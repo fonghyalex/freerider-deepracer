@@ -368,7 +368,7 @@ def optimal_speed(optimal_angle):
     return ((MIN_SPEED-MAX_SPEED)/MAX_ABOSLUTE_ANGLE)*optimal_angle + MAX_SPEED 
 
 
-def exponential_average_angle(angles : list, length : int):
+def exponential_average_angle(angles, length):
     angles = angles [::-1]
     angles_emas = []
     for i in range(length):
