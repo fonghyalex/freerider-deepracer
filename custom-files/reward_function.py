@@ -346,112 +346,74 @@ optimal_waypoints = ([[-5.07720415e+00,  6.00905286e+00],
        [-5.21859954e+00,  5.98889039e+00],
        [-5.07720415e+00,  6.00905286e+00]])
 
-# def print_params(params):
-#     print(f"all_wheels_on_track: {params['all_wheels_on_track']}")
-#     print(f"x: {params['x']}")
-#     print(f"y: {params['y']}")
-#     print(f"closest_waypoints: {params['closest_waypoints']}")
-#     print(f"distance_from_center: {params['distance_from_center']}")
-#     print(f"is_left_of_center: {params['is_left_of_center']}")
-#     print(f"is_offtrack: {params['is_offtrack']}")
-#     print(f"is_reversed: {params['is_reversed']}")
-#     print(f"heading: {params['heading']}")
-#     print(f"progress: {params['progress']}")
-#     print(f"speed: {params['speed']}")
-#     print(f"steering_angle: {params['steering_angle']}")
-#     print(f"steps: {params['steps']}")
-
-def optimal_speed(optimal_angle): 
-    MAX_SPEED = 3.7
-    MIN_SPEED = 1.2
-    MAX_ABOSLUTE_ANGLE = 30 
-    return ((MIN_SPEED-MAX_SPEED)/MAX_ABOSLUTE_ANGLE)*optimal_angle + MAX_SPEED 
+def print_params(params):
+    print(f"all_wheels_on_track: {params['all_wheels_on_track']}")
+    print(f"x: {params['x']}")
+    print(f"y: {params['y']}")
+    print(f"closest_waypoints: {params['closest_waypoints']}")
+    print(f"distance_from_center: {params['distance_from_center']}")
+    print(f"is_left_of_center: {params['is_left_of_center']}")
+    print(f"is_offtrack: {params['is_offtrack']}")
+    print(f"is_reversed: {params['is_reversed']}")
+    print(f"heading: {params['heading']}")
+    print(f"progress: {params['progress']}")
+    print(f"speed: {params['speed']}")
+    print(f"steering_angle: {params['steering_angle']}")
+    print(f"steps: {params['steps']}")
 
 
-def exponential_average_angle(angles, length):
-    angles = angles [::-1]
-    angles_emas = []
-    for i in range(length):
-        if i == 0 : 
-            angles_emas.append(angles[0]*(1-(2/length+1)))
-        else : 
-            angles_emas.append((angles[i]*(1+(2/length+1))) + (angles_emas[i-1]*(1-(2/length+1))))
-        
-    return angles_emas[length-1]
-
-
-def calculate_heading_difference_weighting(params):
-    
+def calculate_heading_difference(params):
     closest_waypoints = params['closest_waypoints']
     heading = params['heading']
     cur_x = params['x']
     cur_y = params['y']
     
-    
     # Calculate the direction of the center line based 
-    # current_opt_point = optimal_waypoints[closest_waypoints[0]]
+    current_opt_point = optimal_waypoints[closest_waypoints[0]]
     next_opt_point = optimal_waypoints[closest_waypoints[1]]
     future_opt_point_2 = optimal_waypoints[min(closest_waypoints[1]+1, len(optimal_waypoints)-1)]
     future_opt_point_3 = optimal_waypoints[min(closest_waypoints[1]+2, len(optimal_waypoints)-1)]
     future_opt_point_4 = optimal_waypoints[min(closest_waypoints[1]+3, len(optimal_waypoints)-1)]
     future_opt_point_5 = optimal_waypoints[min(closest_waypoints[1]+4, len(optimal_waypoints)-1)]
     
-    FUTURE_POINTS_NUM = 2
+    FUTURE_POINTS_NUM = 3
     points = [next_opt_point, future_opt_point_2, future_opt_point_3, future_opt_point_4, future_opt_point_5]
-
-    next_turns = [] 
+    
+    sum_of_angle = 0
+    weight = 0
     for i in range(FUTURE_POINTS_NUM):
         next_track_direction = math.atan2(points[i][1] - cur_y, points[i][0] - cur_x)
-        next_track_angle = math.degrees(next_track_direction)
-        optimal_heading_diff = next_track_angle - heading
-        next_turns.append(optimal_heading_diff)
-        
-    optimal_angle = exponential_average_angle(next_turns,FUTURE_POINTS_NUM)
-    
-    return optimal_angle
+        # Angle times weight
+        sum_of_angle += math.degrees(next_track_direction) * (FUTURE_POINTS_NUM - i)
+        weight += FUTURE_POINTS_NUM - i
+    return abs((sum_of_angle/weight) - heading)
 
 def reward_function(params):
-    # print_params(params)
+    print_params(params)
     steering_angle = params['steering_angle']
+    is_off_track = params['is_offtrack']
+    speed = params['speed']
     ### Initial reward
     reward = 10.0
+
+    if is_off_track:
+        return 1e-3
+
+    optimal_heading_diff = calculate_heading_difference(params)
     
-    optimal_heading_diff = calculate_heading_difference_weighting(params)
-    opt_speed = optimal_speed(optimal_heading_diff)
-    steering_angle_optimal_heading_diff = abs(steering_angle - optimal_heading_diff)
-    speed_optimal_speed_difference = abs(opt_speed - params['speed'])
-    # print(f'steering_angle_optimal_heading_diff: {steering_angle_optimal_heading_diff}')
-    
+    speed_reward = 0
     # give the reward
-    if steering_angle_optimal_heading_diff > 30:
-        reward *= 0.2
-    elif steering_angle_optimal_heading_diff > 20:
-        reward *= 0.5
-    elif steering_angle_optimal_heading_diff > 15:
-        reward *= 0.7
-    elif steering_angle_optimal_heading_diff > 10:
-        reward *= 1
-    elif steering_angle_optimal_heading_diff > 5:
-        reward *= 1.7
-    elif steering_angle_optimal_heading_diff >= 0:
-        reward *= 2.2
-
-    if speed_optimal_speed_difference > 1.8:
-        reward *= 0.2
-    elif speed_optimal_speed_difference > 1.5:
-        reward *= 0.5
-    elif speed_optimal_speed_difference > 1.2:
-        reward *= 0.7
-    elif speed_optimal_speed_difference > 0.9:
-        reward *= 1
-    elif speed_optimal_speed_difference > 0.6:
-        reward *= 1.7
-    elif speed_optimal_speed_difference >= 0.3:
-        reward *= 2.2
+    if optimal_heading_diff > 30:
+        reward *= 0.2 + (1 / speed)
+    elif optimal_heading_diff > 20:
+        reward *= 0.5 + (1 / speed)
+    elif optimal_heading_diff > 15:
+        reward *= 0.7 + (1 / speed)
+    elif optimal_heading_diff > 10:
+        reward *= 1 + speed
+    elif optimal_heading_diff > 5:
+        reward *= 1.7 + speed
+    elif optimal_heading_diff >= 0:
+        reward *= 2.2 + speed
     
-    if  params['all_wheels_on_track'] : 
-        reward+=30
-    else :
-        reward-=22.5
-
     return float(reward)
