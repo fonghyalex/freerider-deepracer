@@ -346,22 +346,6 @@ optimal_waypoints = ([[-5.07720415e+00,  6.00905286e+00],
        [-5.21859954e+00,  5.98889039e+00],
        [-5.07720415e+00,  6.00905286e+00]])
 
-def print_params(params):
-    print(f"all_wheels_on_track: {params['all_wheels_on_track']}")
-    print(f"x: {params['x']}")
-    print(f"y: {params['y']}")
-    print(f"closest_waypoints: {params['closest_waypoints']}")
-    print(f"distance_from_center: {params['distance_from_center']}")
-    print(f"is_left_of_center: {params['is_left_of_center']}")
-    print(f"is_offtrack: {params['is_offtrack']}")
-    print(f"is_reversed: {params['is_reversed']}")
-    print(f"heading: {params['heading']}")
-    print(f"progress: {params['progress']}")
-    print(f"speed: {params['speed']}")
-    print(f"steering_angle: {params['steering_angle']}")
-    print(f"steps: {params['steps']}")
-
-
 def calculate_heading_difference(params):
     closest_waypoints = params['closest_waypoints']
     heading = params['heading']
@@ -389,7 +373,6 @@ def calculate_heading_difference(params):
     return abs((sum_of_angle/weight) - heading)
 
 def reward_function(params):
-    print_params(params)
     steering_angle = params['steering_angle']
     is_off_track = params['is_offtrack']
     speed = params['speed']
