@@ -419,5 +419,10 @@ def reward_function(params):
     direction_reward = get_direction_reward(params)
     distance_reward = get_distance_reward(params)
     # speed_reward = get_speed_reward(params)
+    total_reward = (direction_reward + distance_reward)
     
-    return (direction_reward + distance_reward)
+    if params['is_offtrack']:
+        total_reward = 0.0001
+    
+    
+    return total_reward 
