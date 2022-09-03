@@ -418,6 +418,6 @@ def get_speed_reward(params):
 def reward_function(params):
     direction_reward = get_direction_reward(params)
     distance_reward = get_distance_reward(params)
-    speed_reward = get_speed_reward(params)
+    # speed_reward = get_speed_reward(params)
     
-    return (direction_reward + distance_reward + speed_reward)
+    return (direction_reward + distance_reward)
