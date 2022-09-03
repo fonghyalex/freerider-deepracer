@@ -402,16 +402,17 @@ def speed_reward(params):
     fifth_track_diff = degree_diff(first_track_direction, fifth_track_direction)
 
     # Speed reward
+    sreward = 0
     speed_multiplier = 10
     angel_threshold = 10
     if (fifth_track_diff >= angel_threshold):
         # Slow down
-        speed_reward = speed_multiplier * (1 / speed)
+        sreward = speed_multiplier * (1 / speed)
     else:
         # Speed up
-        speed_reward = speed_multiplier * speed
+        sreward = speed_multiplier * speed
 
-    return speed_reward
+    return sreward
 
 def degree_diff(curr, next):
     predict_direction_diff = abs(next - curr)
@@ -427,14 +428,12 @@ def reward_function(params):
     ### Initial reward
     reward = 0
     angle_reward = 10.0
-    speed_reward = 10.0
 
     if is_off_track:
         return 1e-3
 
     optimal_heading_diff = calculate_heading_difference(params)
-    
-    speed_reward = 0
+
     # give the reward
     if optimal_heading_diff > 30:
         reward = angle_reward * 0.2 + (1/speed)
