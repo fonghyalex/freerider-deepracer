@@ -436,11 +436,11 @@ def reward_function(params):
 
     # give the reward
     if optimal_heading_diff > 30:
-        reward = angle_reward * 0.2 + (1/speed)
+        reward = angle_reward * 0.2
     elif optimal_heading_diff > 20:
-        reward = angle_reward * 0.5 + (1/speed)
+        reward = angle_reward * 0.5
     elif optimal_heading_diff > 15:
-        reward = angle_reward * 0.7 + (1/speed)
+        reward = angle_reward * 0.7
     elif optimal_heading_diff > 10:
         reward = angle_reward * 1
     elif optimal_heading_diff > 5:
